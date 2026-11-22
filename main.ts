@@ -1,3 +1,5 @@
+// main.ts — interpreter for the tiny stack ISA.
+// Executes bytecode with a bounded data stack and call stack.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -7,7 +9,7 @@ function run(program: Uint8Array, input: Uint8Array): {out: Uint8Array; code:num
   let pc=0, ip=0, steps=0;
   const done=(code:number)=>({out:Uint8Array.from(out),code});
   const trap=(n:number)=>done(n);
-  const spec=new Map<number,[number,number]>([
+  const spec=new Map<number,[number,number]>([ // opcode stack effects: pops, then pushes
     [0, [0,0]],[1,[0,1]],[2,[0,1]],[3,[1,0]],[4,[1,2]],[5,[2,2]],[6,[2,3]],[7,[3,3]],
     ...Array.from({length:15},(_,i)=>[0x10+i, [i===7||i===11?1:2, i===7||i===11?1: i>=12?1:1]] as [number,[number,number]]),
     [0x20,[2,1]],[0x21,[2,1]],[0x22,[2,1]],[0x30,[0,0]],[0x31,[1,0]],[0x32,[1,0]],[0x33,[0,0]],[0x34,[0,0]],
